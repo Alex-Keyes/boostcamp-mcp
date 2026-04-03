@@ -1,53 +1,123 @@
-# Boostcamp MCP Server (Python)
+# Boostcamp MCP Server
 
-A Model Context Protocol (MCP) server for [Boostcamp](https://www.boostcamp.app/), built as a wrapper around the [boostcamp-api](https://github.com/Alex-Keyes/boostcamp-api) library using [FastMCP](https://github.com/jlowin/fastmcp).
+A Model Context Protocol (MCP) server for integrating with the [Boostcamp](https://www.boostcamp.app/) fitness platform. This server provides seamless access to your training history, workout programs, custom exercises, and analytics through Claude Desktop and Claude Code.
 
-This architecture is identical to the Monarch Money MCP: the server imports the API logic directly as a dependency, so no separate API server needs to be running.
+**Built with the [boostcamp-api Python library](https://github.com/Alex-Keyes/boostcamp-api)** - A library for interacting with Boostcamp's private API.
 
-## Features
+## 🚀 Quick Start
 
--   **Profile**: Get user profile and fitness stats using `get_my_profile`.
--   **Programs**: List enrolled programs using `list_enrolled_programs`.
+### 1. Installation
 
-## Token Authentication
+1. **Clone this repository**:
+   ```bash
+   git clone https://github.com/Alex-Keyes/boostcamp-mcp.git
+   cd boostcamp-mcp
+   ```
 
-Boostcamp uses Firebase-based authentication. The `login` script handles this for you:
+2. **Install dependencies**:
+   Using `uv`:
+   ```bash
+   uv sync
+   ```
 
-1.  **Run Login**:
-    ```bash
-    uv run login
-    ```
-2.  **Enter Credentials**: Enter your Boostcamp email and password.
-3.  **Automatic Setup**: The script fetches your `FirebaseIdToken` and saves it to your `.env` file as `BOOSTCAMP_AUTH_TOKEN`. The MCP server will use this token for all requests.
+3. **Configure Claude Desktop**:
+   Add this to your Claude Desktop configuration file:
 
-## Setup
+   **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
-### Prerequisites
+   ```json
+   {
+     "mcpServers": {
+       "Boostcamp": {
+         "command": "uv",
+         "args": [
+           "run",
+           "--with",
+           "mcp[cli]",
+           "--with-editable",
+           "/path/to/your/boostcamp-mcp",
+           "mcp",
+           "run",
+           "/path/to/your/boostcamp-mcp/src/boostcamp_mcp/server.py"
+         ]
+       }
+     }
+   }
+   ```
 
--   [uv](https://github.com/astral-sh/uv) installed.
+   **Important**: Replace `/path/to/your/boostcamp-mcp` with your actual path!
 
-### Gemini / Claude Configuration
+4. **Restart Claude Desktop**
 
-Add the following to your MCP configuration file:
+### 2. One-Time Authentication Setup
 
-```json
-"boostcamp": {
-  "command": "uv",
-  "args": [
-    "run",
-    "--with",
-    "mcp[cli]",
-    "--with-editable",
-    "/Users/alexkeyes/Projects/boostcamp-mcp",
-    "mcp",
-    "run",
-    "/Users/alexkeyes/Projects/boostcamp-mcp/src/boostcamp_mcp/server.py"
-  ],
-  "env": {
-    "BOOSTCAMP_AUTH_TOKEN": "your_saved_token_here"
-  }
-}
+**Important**: For security, authentication is performed via a standalone script to generate a session.
+
+Open Terminal and run:
+
+```bash
+cd /path/to/your/boostcamp-mcp
+uv run login
 ```
 
-Note: You can omit `BOOSTCAMP_AUTH_TOKEN` from the `env` section if you have a `.env` file in the project directory, as the server will load it automatically.
-can omit `BOOSTCAMP_AUTH_TOKEN` from the `env` section if you have a `.env` file in the project directory, as the server will load it automatically.
+Follow the prompts:
+- Enter your Boostcamp email and password.
+- The script will securely authenticate and save your session locally.
+- Session tokens are stored in a `.env` file and `.boostcamp/` directory (automatically ignored by git).
+
+### 3. Start Using
+
+Once authenticated, use these tools directly in Claude:
+- `get_my_profile` - View your profile and general stats.
+- `list_enrolled_programs` - See your current active programs.
+- `get_training_history` - Review your past workouts.
+- `get_home_summary` - Get your dashboard streak and totals.
+
+## ✨ Features
+
+### 📊 Fitness Analytics
+- **Home Summary**: Get total workouts, total weight moved, and current week streak.
+- **Volume Charts**: Access training volume data over time.
+- **Muscle Distribution**: See which muscle groups you've been targeting.
+
+### 🏋️ Workout Management
+- **Program Details**: Fetch full workout plans, including sets, reps, and coach notes.
+- **Enrolled Programs**: Track your progress in active training plans.
+- **Custom Exercises**: Access exercises you've manually created.
+
+### 📚 Content & Discovery
+- **Program Catalog**: Search and list all available programs on the platform.
+- **Blog Access**: Read the latest articles and training guides from the Boostcamp blog.
+
+## 🛠️ Available Tools
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `get_my_profile` | Get user profile and settings | None |
+| `list_enrolled_programs` | List your active programs | None |
+| `get_training_history` | Get detailed workout history | `timezone_offset` |
+| `get_payment_history` | View your subscription/orders | None |
+| `list_custom_exercises` | List your unique exercises | None |
+| `list_all_programs` | Search the program catalog | `page`, `page_size`, `keyword` |
+| `get_program_details` | Get full plan for a program ID | `program_id` |
+| `list_blogs` | List recent blog posts | `page`, `page_size` |
+| `get_home_summary` | Dashboard stats (streak/totals) | `timezone_offset` |
+| `get_home_chart` | Training volume chart data | `timezone_offset` |
+| `get_home_muscle` | Muscle group distribution | `timezone_offset` |
+
+## 🔧 Troubleshooting
+
+### Authentication Issues
+If you see "Authentication Error" or token expiration messages:
+1. Run the login command: `uv run login`
+2. Restart your MCP client (Claude Desktop or Claude Code).
+
+### Session Management
+- Sessions are stored in `.boostcamp/session.pickle`.
+- The `BOOSTCAMP_AUTH_TOKEN` is saved to your local `.env`.
+- **Security Note**: Never commit your `.env` or `.boostcamp/` folder. They are included in `.gitignore` by default.
+
+## 📄 License
+
+MIT License
