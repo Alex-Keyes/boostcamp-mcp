@@ -11,11 +11,15 @@ A Model Context Protocol (MCP) server for the [Boostcamp API](https://github.com
 
 ## Token Authentication
 
-The Boostcamp API uses **JWT (JSON Web Tokens)** for protected routes (like `create_bootcamp`).
+The Boostcamp API uses **JWT (JSON Web Tokens)** for protected routes. You can authenticate easily using the built-in login script:
 
-1.  **Login**: Use the API's `/api/v1/auth/login` endpoint to get a token.
-2.  **Configuration**: Set the `BOOSTCAMP_AUTH_TOKEN` environment variable.
-3.  **Usage**: The server automatically adds the `Authorization: Bearer <token>` header to protected requests.
+1.  **Configure API URL**: Ensure `BOOSTCAMP_API_URL` is set in your `.env` file (defaults to `http://localhost:5000/api/v1`).
+2.  **Run Login**:
+    ```bash
+    uv run login
+    ```
+3.  **Enter Credentials**: Follow the prompts to enter your email and password.
+4.  **Automatic Setup**: The script will fetch the JWT and save it to your `.env` file as `BOOSTCAMP_AUTH_TOKEN`. The MCP server will automatically pick this up on every request.
 
 ## Setup
 

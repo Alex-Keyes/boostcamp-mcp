@@ -4,7 +4,11 @@ from fastmcp import FastMCP
 from dotenv import load_dotenv
 from typing import Optional, List, Dict, Any
 
-load_dotenv()
+from pathlib import Path
+
+# Load .env from current directory
+env_path = Path(".env")
+load_dotenv(dotenv_path=env_path)
 
 API_URL = os.getenv("BOOSTCAMP_API_URL", "http://localhost:5000/api/v1")
 AUTH_TOKEN = os.getenv("BOOSTCAMP_AUTH_TOKEN", "")
@@ -13,9 +17,12 @@ AUTH_TOKEN = os.getenv("BOOSTCAMP_AUTH_TOKEN", "")
 mcp = FastMCP("boostcamp")
 
 def get_headers():
+    # Reload env in case it changed during runtime
+    load_dotenv(dotenv_path=env_path)
+    token = os.getenv("BOOSTCAMP_AUTH_TOKEN", "")
     headers = {}
-    if AUTH_TOKEN:
-        headers["Authorization"] = f"Bearer {AUTH_TOKEN}"
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     return headers
 
 @mcp.tool()
@@ -109,5 +116,8 @@ async def create_bootcamp(
         response = await client.post(f"{API_URL}/bootcamps", json=data, headers=headers)
         return response.text
 
-if __name__ == "__main__":
+def main():
     mcp.run()
+
+if __name__ == "__main__":
+    main()
