@@ -23,9 +23,6 @@ dev-dependencies = [
     "mcp[cli]>=1.2.1",
 ]
 
-[tool.uv.sources]
-boostcampapi = { path = "../boostcamp-api", editable = true }
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

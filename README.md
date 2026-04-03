@@ -25,7 +25,6 @@ Boostcamp uses Firebase-based authentication. The `login` script handles this fo
 ### Prerequisites
 
 -   [uv](https://github.com/astral-sh/uv) installed.
--   The `boostcamp-api` repository cloned in the same parent directory as this project.
 
 ### Gemini / Claude Configuration
 
@@ -51,3 +50,4 @@ Add the following to your MCP configuration file:
 ```
 
 Note: You can omit `BOOSTCAMP_AUTH_TOKEN` from the `env` section if you have a `.env` file in the project directory, as the server will load it automatically.
+can omit `BOOSTCAMP_AUTH_TOKEN` from the `env` section if you have a `.env` file in the project directory, as the server will load it automatically.
