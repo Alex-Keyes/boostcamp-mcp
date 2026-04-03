@@ -6,9 +6,8 @@ This architecture is identical to the Monarch Money MCP: the server imports the 
 
 ## Features
 
--   **Profile**: Get user profile and fitness stats.
--   **Programs**: List enrolled programs and view details.
--   **Workouts**: View workout history.
+-   **Profile**: Get user profile and fitness stats using `get_my_profile`.
+-   **Programs**: List enrolled programs using `list_enrolled_programs`.
 
 ## Token Authentication
 
