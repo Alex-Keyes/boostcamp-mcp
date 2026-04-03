@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "boostcampapi",
     "fastmcp>=3.2.0",
     "httpx>=0.28.1",
     "python-dotenv>=1.2.2",
@@ -21,6 +22,9 @@ login = "boostcamp_mcp.login:main"
 dev-dependencies = [
     "mcp[cli]>=1.2.1",
 ]
+
+[tool.uv.sources]
+boostcampapi = { path = "../boostcamp-api", editable = true }
 
 [build-system]
 requires = ["hatchling"]
