@@ -1,67 +1,56 @@
-# Boostcamp MCP Server
+# Boostcamp MCP Server (Python)
 
-A Model Context Protocol (MCP) server for the [Boostcamp API](https://github.com/Alex-Keyes/boostcamp-api).
-
-This server allows AI clients like Claude to interact with the Boostcamp directory application, enabling them to search for bootcamps, view courses, and manage listings.
+A Model Context Protocol (MCP) server for the [Boostcamp API](https://github.com/Alex-Keyes/boostcamp-api) built using [FastMCP](https://github.com/jlowin/fastmcp).
 
 ## Features
 
--   **Get Bootcamps**: List all bootcamps with filtering, sorting, and pagination.
--   **Search by Radius**: Find bootcamps within a certain distance from a zipcode.
--   **View Courses**: Explore courses offered by bootcamps.
--   **Read Reviews**: See user feedback for different bootcamps.
--   **Create Bootcamp**: Add new bootcamp listings (requires authentication).
+-   **Get Bootcamps**: List bootcamps with filtering and pagination.
+-   **Radius Search**: Find bootcamps near a zipcode.
+-   **Courses & Reviews**: Access associated courses and reviews.
+-   **Create Bootcamp**: Protected endpoint to add new listings.
+
+## Token Authentication
+
+The Boostcamp API uses **JWT (JSON Web Tokens)** for protected routes (like `create_bootcamp`).
+
+1.  **Login**: Use the API's `/api/v1/auth/login` endpoint to get a token.
+2.  **Configuration**: Set the `BOOSTCAMP_AUTH_TOKEN` environment variable.
+3.  **Usage**: The server automatically adds the `Authorization: Bearer <token>` header to protected requests.
 
 ## Setup
 
 ### Prerequisites
 
--   [Node.js](https://nodejs.org/) (v18 or later)
--   A running instance of the [Boostcamp API](https://github.com/Alex-Keyes/boostcamp-api).
-
-### Installation
-
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/Alex-Keyes/boostcamp-mcp
-    cd boostcamp-mcp
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Build the project:
-    ```bash
-    npm run build
-    ```
+-   [uv](https://github.com/astral-sh/uv) installed.
 
 ### Configuration
 
-Create a `.env` file based on `.env.example`:
-
-```bash
-cp .env.example .env
-```
-
-Edit the `.env` file to match your setup:
+Set environment variables in a `.env` file:
 
 ```env
 BOOSTCAMP_API_URL=http://localhost:5000/api/v1
 BOOSTCAMP_AUTH_TOKEN=your_jwt_token_here
 ```
 
-## Usage
+## Gemini / Claude Configuration
 
-### Connecting to Claude Desktop
-
-Add the following to your Claude Desktop configuration (e.g., `~/Library/Application Support/Claude/claude_desktop_config.json`):
+Add the following to your MCP configuration file (e.g., `gemini.config.json`):
 
 ```json
 {
   "mcpServers": {
     "boostcamp": {
-      "command": "node",
-      "args": ["/absolute/path/to/boostcamp-mcp/dist/index.js"],
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "mcp[cli]",
+        "--with-editable",
+        "/Users/alexkeyes/Projects/boostcamp-mcp",
+        "mcp",
+        "run",
+        "/Users/alexkeyes/Projects/boostcamp-mcp/src/boostcamp_mcp/server.py"
+      ],
       "env": {
         "BOOSTCAMP_API_URL": "http://localhost:5000/api/v1",
         "BOOSTCAMP_AUTH_TOKEN": "your_jwt_token_here"
@@ -71,27 +60,10 @@ Add the following to your Claude Desktop configuration (e.g., `~/Library/Applica
 }
 ```
 
-## Tools
-
-| Tool | Description |
-| :--- | :--- |
-| `get_bootcamps` | Get all bootcamps with filtering and pagination. |
-| `get_bootcamp` | Get a single bootcamp by ID. |
-| `get_courses` | Get all courses (optionally filter by bootcamp). |
-| `get_reviews` | Get all reviews (optionally filter by bootcamp). |
-| `get_bootcamps_radius` | Get bootcamps within a radius of a zipcode. |
-| `create_bootcamp` | Create a new bootcamp (Requires Publisher/Admin roles). |
-
 ## Development
 
-Run the server in development mode:
+Run the server locally for testing:
 
 ```bash
-npm run dev
+uv run src/boostcamp_mcp/server.py
 ```
-
-The server communicates via `stdio`.
-
-## License
-
-MIT

@@ -1,6 +1,6 @@
-node_modules
-dist
+__pycache__/
+.venv/
 .env
 .DS_Store
 *.log
-package-lock.json
+.python-version
