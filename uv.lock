@@ -181,7 +181,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "boostcampapi", editable = "../boostcamp-api" },
+    { name = "boostcampapi", git = "https://github.com/Alex-Keyes/boostcamp-api.git" },
     { name = "fastmcp", specifier = ">=3.2.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
@@ -193,13 +193,10 @@ dev = [{ name = "mcp", extras = ["cli"], specifier = ">=1.2.1" }]
 [[package]]
 name = "boostcampapi"
 version = "0.1.0"
-source = { editable = "../boostcamp-api" }
+source = { git = "https://github.com/Alex-Keyes/boostcamp-api.git#4ccb781ed014a84618c0c551dc2355ee9b3636ff" }
 dependencies = [
     { name = "aiohttp" },
 ]
-
-[package.metadata]
-requires-dist = [{ name = "aiohttp", specifier = ">=3.8.0" }]
 
 [[package]]
 name = "cachetools"
