@@ -22,40 +22,14 @@ def get_api_client():
     token = os.getenv("BOOSTCAMP_AUTH_TOKEN", "")
     return BoostcampAPI(token=token)
 
-async def re_login() -> bool:
-    """Attempt to re-login using stored credentials."""
-    load_dotenv(dotenv_path=env_path, override=True)
-    email = os.getenv("BOOSTCAMP_EMAIL", "")
-    password = os.getenv("BOOSTCAMP_PASSWORD", "")
-    if not email or not password:
-        return False
-    try:
-        from dotenv import set_key
-        api = BoostcampAPI()
-        await api.login(email, password)
-        if api.token:
-            set_key(str(env_path), "BOOSTCAMP_AUTH_TOKEN", api.token)
-            return True
-    except Exception:
-        pass
-    return False
-
 async def handle_api_call(func: Callable[..., Coroutine[Any, Any, Any]], *args, **kwargs) -> str:
-    """Helper to handle common API call errors, with automatic re-login."""
+    """Helper to handle common API call errors."""
     api = get_api_client()
     try:
         result = await func(api, *args, **kwargs)
         return str(result)
-    except BoostcampAuthException:
-        # Token expired — try re-login with stored credentials
-        if await re_login():
-            api = get_api_client()
-            try:
-                result = await func(api, *args, **kwargs)
-                return str(result)
-            except Exception as e:
-                return f"Error after re-login: {str(e)}"
-        return "Authentication Error: Token expired and no stored credentials found. Please run 'uv run login' again."
+    except BoostcampAuthException as e:
+        return f"Authentication Error: {str(e)}. Please run 'uv run login' again."
     except Exception as e:
         return f"Error: {str(e)}"
 
