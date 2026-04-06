@@ -10,27 +10,34 @@ env_path = Path(".env")
 load_dotenv(dotenv_path=env_path)
 
 async def login():
-    print(f"--- Boostcamp API Login (Library Wrapper) ---")
-    
-    email = input("Email: ")
-    password = getpass.getpass("Password: ")
+    print("--- Boostcamp API Login ---")
+
+    # Check for stored credentials
+    email = os.getenv("BOOSTCAMP_EMAIL", "")
+    password = os.getenv("BOOSTCAMP_PASSWORD", "")
+
+    if email and password:
+        print(f"Using stored credentials for {email}")
+    else:
+        email = input("Email: ")
+        password = getpass.getpass("Password: ")
 
     try:
         api = BoostcampAPI()
-        # The library method returns None but sets api.token internally
         await api.login(email, password)
-        
+
         if api.token:
-            # Save to .env file
             if not env_path.exists():
                 env_path.touch()
-            
+
+            set_key(str(env_path), "BOOSTCAMP_EMAIL", email)
+            set_key(str(env_path), "BOOSTCAMP_PASSWORD", password)
             set_key(str(env_path), "BOOSTCAMP_AUTH_TOKEN", api.token)
             print("\n✅ Login successful!")
-            print(f"Token saved to {env_path.absolute()}")
+            print(f"Credentials and token saved to {env_path.absolute()}")
         else:
             print("\n❌ Login failed: No token found after login attempt.")
-                
+
     except LoginFailedException as e:
         print(f"\n❌ Login failed: {str(e)}")
     except Exception as e:
