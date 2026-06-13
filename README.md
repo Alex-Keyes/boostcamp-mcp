@@ -33,6 +33,8 @@ A Model Context Protocol (MCP) server for integrating with the [Boostcamp](https
          "command": "uv",
          "args": [
            "run",
+           "--directory",
+           "/path/to/your/boostcamp-mcp",
            "--with",
            "fastmcp",
            "--with-editable",
