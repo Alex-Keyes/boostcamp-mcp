@@ -24,7 +24,9 @@ dev-dependencies = [
 ]
 
 [tool.uv.sources]
-boostcampapi = { git = "https://github.com/Alex-Keyes/boostcamp-api.git" }
+# TODO: repoint at Alex-Keyes/boostcamp-api main once the refresh-token PR
+# (https://github.com/Alex-Keyes/boostcamp-api/pull/2) is merged.
+boostcampapi = { git = "https://github.com/dcaslin/boostcamp-api.git", branch = "fix/firebase-refresh-token" }
 
 [build-system]
 requires = ["hatchling"]

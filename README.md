@@ -114,8 +114,16 @@ If you see "Authentication Error" or token expiration messages:
 2. Restart your MCP client (Claude Desktop or Claude Code).
 
 ### Session Management
-- Sessions are stored in `.boostcamp/session.pickle`.
-- The `BOOSTCAMP_AUTH_TOKEN` is saved to your local `.env`.
+- Sessions are stored in `.boostcamp/session.pickle` as `{token, refresh_token}`.
+  The Firebase **refresh token** (not your password) is persisted, so an expired
+  ID token is renewed automatically on the next request — no re-login needed for
+  routine expiry.
+- A `BOOSTCAMP_AUTH_TOKEN` is also saved to `.env` and used as a fallback for
+  logins that predate refresh-token support (token-only, no auto-renewal).
+- **Upgrading:** if you logged in before refresh-token support was added, run
+  `uv run login` once to store the refresh token and enable auto-renewal.
+- You only need to re-run `uv run login` if the refresh token itself becomes
+  invalid (e.g. after a password change).
 - **Security Note**: Never commit your `.env` or `.boostcamp/` folder. They are included in `.gitignore` by default.
 
 ## 📄 License

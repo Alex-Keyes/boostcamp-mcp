@@ -16,8 +16,26 @@ load_dotenv(dotenv_path=env_path)
 mcp = FastMCP("boostcamp")
 
 def get_api_client():
-    """Initialize the API client with the saved token."""
-    # Reload env in case it changed (e.g. after login)
+    """Initialize the API client from the saved login session.
+
+    Prefers the session file written by `uv run login`, which carries the
+    Firebase refresh token alongside the ID token. With the refresh token
+    loaded, the library renews an expired ID token automatically on a 403
+    (via the secure-token endpoint) instead of failing the call.
+
+    Falls back to a bare token from `.env` for older logins that predate
+    refresh-token support — those still work until the ID token expires, after
+    which a fresh `uv run login` is needed (no silent renewal).
+    """
+    api = BoostcampAPI()
+    try:
+        if api.load_session():
+            return api
+    except Exception:
+        # Corrupt/old-format session file — fall through to the env token.
+        pass
+
+    # Legacy fallback: token-only, no refresh capability.
     load_dotenv(dotenv_path=env_path, override=True)
     token = os.getenv("BOOSTCAMP_AUTH_TOKEN", "")
     return BoostcampAPI(token=token)
