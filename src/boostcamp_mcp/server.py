@@ -1,4 +1,5 @@
 import os
+import json
 import asyncio
 from fastmcp import FastMCP
 from dotenv import load_dotenv
@@ -7,6 +8,8 @@ from pathlib import Path
 
 # Import the actual library and exceptions
 from boostcampapi import BoostcampAPI, BoostcampAuthException, RequestFailedException
+
+from boostcamp_mcp import history
 
 # Load .env from current directory
 env_path = Path(".env")
@@ -44,9 +47,47 @@ async def list_enrolled_programs() -> str:
     return await handle_api_call(lambda api: api.list_user_programs())
 
 @mcp.tool()
-async def get_training_history(timezone_offset: int = -300) -> str:
-    """Get the user's training history. Default timezone offset is -300."""
-    return await handle_api_call(lambda api: api.get_training_history(timezone_offset))
+async def get_training_history(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    detail: str = "summary",
+    page: int = 1,
+    page_size: int = 50,
+    timezone_offset: int = -300,
+) -> str:
+    """Get the user's workout history, filtered and paginated to stay compact.
+
+    Args:
+        start_date: Only workouts on/after this date, "YYYY-MM-DD" (inclusive).
+        end_date: Only workouts on/before this date, "YYYY-MM-DD" (inclusive).
+        detail: "summary" (date, program, exercises, total volume — default) or
+            "full" (adds every set with weight/reps/RPE).
+        page: 1-based page number, newest workouts first.
+        page_size: Workouts per page. Capped at 100 for summary, 25 for full.
+        timezone_offset: Timezone offset in minutes (default -300 / EST).
+
+    Returns JSON with `workouts`, `pagination` (incl. has_more), `filters`, and
+    a `hint` describing how to fetch more (next page, date range, or full detail).
+    """
+    try:
+        # Surface validation errors as clean strings before the network call.
+        history.validate_params(start_date, end_date, detail, page, page_size)
+    except ValueError as e:
+        return f"Error: {e}"
+
+    api = get_api_client()
+    try:
+        raw = await api.get_training_history(timezone_offset)
+    except BoostcampAuthException as e:
+        return (f"Authentication Error: {str(e)}. "
+                "Please run 'uv run login' again.")
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+    result = history.shape_history(
+        raw, start_date=start_date, end_date=end_date, detail=detail,
+        page=page, page_size=page_size)
+    return json.dumps(result, indent=2)
 
 @mcp.tool()
 async def get_payment_history() -> str:
