@@ -18,7 +18,8 @@ async def login():
     try:
         api = BoostcampAPI()
         # The library method returns None but sets api.token internally
-        await api.login(email, password)
+        # The MCP server only needs the token; do not persist the plaintext password.
+        await api.login(email, password, save_session=False)
         
         if api.token:
             # Save to .env file

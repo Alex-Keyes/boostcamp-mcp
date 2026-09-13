@@ -61,10 +61,25 @@ cd /path/to/your/boostcamp-mcp
 uv run login
 ```
 
-Follow the prompts:
+This command supports Boostcamp accounts with an email and password. Follow the prompts:
 - Enter your Boostcamp email and password.
 - The script will securely authenticate and save your session locally.
-- Session tokens are stored in a `.env` file and `.boostcamp/` directory (automatically ignored by git).
+- The ID token is stored in the local `.env` file (automatically ignored by git).
+
+#### Google, passkey, and other OAuth accounts
+
+If your account has no password, copy Firebase's `refreshToken` from your authenticated
+Boostcamp browser session and add it to `.env`:
+
+```dotenv
+BOOSTCAMP_REFRESH_TOKEN=your-refresh-token
+```
+
+Restart the MCP server after initially changing `.env`. The server exchanges the refresh
+token for Firebase ID tokens and refreshes them automatically before they expire.
+
+**Security:** A refresh token is a long-lived credential equivalent to a password. Never
+commit it, share it in an issue, or include it in logs or screenshots.
 
 ### 3. Start Using
 
@@ -110,13 +125,15 @@ Once authenticated, use these tools directly in Claude:
 
 ### Authentication Issues
 If you see "Authentication Error" or token expiration messages:
-1. Run the login command: `uv run login`
-2. Restart your MCP client (Claude Desktop or Claude Code).
+1. For Google, passkey, or OAuth authentication, check or replace `BOOSTCAMP_REFRESH_TOKEN`.
+2. For email/password authentication, run `uv run login` again.
+3. Restart your MCP client (Claude Desktop or Claude Code).
 
-### Session Management
-- Sessions are stored in `.boostcamp/session.pickle`.
-- The `BOOSTCAMP_AUTH_TOKEN` is saved to your local `.env`.
-- **Security Note**: Never commit your `.env` or `.boostcamp/` folder. They are included in `.gitignore` by default.
+### Credential Management
+- `BOOSTCAMP_AUTH_TOKEN` remains supported, but Firebase ID tokens expire after about one hour.
+- `BOOSTCAMP_REFRESH_TOKEN` enables unattended automatic ID-token refresh.
+- Credentials are read from your local `.env` and are never written to logs.
+- **Security Note**: Never commit your `.env`. It is included in `.gitignore` by default.
 
 ## 📄 License
 

@@ -4,6 +4,7 @@ from fastmcp import FastMCP
 from dotenv import load_dotenv
 from typing import Optional, List, Dict, Any, Callable, Coroutine
 from pathlib import Path
+from boostcamp_mcp.auth import FirebaseTokenProvider, TokenRefreshError
 
 # Import the actual library and exceptions
 from boostcampapi import BoostcampAPI, BoostcampAuthException, RequestFailedException
@@ -14,22 +15,32 @@ load_dotenv(dotenv_path=env_path)
 
 # Initialize FastMCP
 mcp = FastMCP("boostcamp")
+token_provider = FirebaseTokenProvider()
 
-def get_api_client():
+async def get_api_client(*, force_refresh: bool = False):
     """Initialize the API client with the saved token."""
     # Reload env in case it changed (e.g. after login)
     load_dotenv(dotenv_path=env_path, override=True)
-    token = os.getenv("BOOSTCAMP_AUTH_TOKEN", "")
+    token_provider.configure_from_environment()
+    token = await token_provider.get_token(force_refresh=force_refresh)
     return BoostcampAPI(token=token)
 
 async def handle_api_call(func: Callable[..., Coroutine[Any, Any, Any]], *args, **kwargs) -> str:
     """Helper to handle common API call errors."""
-    api = get_api_client()
     try:
+        api = await get_api_client()
         result = await func(api, *args, **kwargs)
         return str(result)
-    except BoostcampAuthException as e:
-        return f"Authentication Error: {str(e)}. Please run 'uv run login' again."
+    except BoostcampAuthException:
+        if os.getenv("BOOSTCAMP_REFRESH_TOKEN"):
+            try:
+                api = await get_api_client(force_refresh=True)
+                return str(await func(api, *args, **kwargs))
+            except (BoostcampAuthException, TokenRefreshError):
+                pass
+        return "Authentication Error: check BOOSTCAMP_REFRESH_TOKEN or run 'uv run login' again."
+    except TokenRefreshError as e:
+        return f"Authentication Error: {e}"
     except Exception as e:
         return f"Error: {str(e)}"
 
