@@ -33,11 +33,13 @@ A Model Context Protocol (MCP) server for integrating with the [Boostcamp](https
          "command": "uv",
          "args": [
            "run",
+           "--directory",
+           "/path/to/your/boostcamp-mcp",
            "--with",
-           "mcp[cli]",
+           "fastmcp",
            "--with-editable",
            "/path/to/your/boostcamp-mcp",
-           "mcp",
+           "fastmcp",
            "run",
            "/path/to/your/boostcamp-mcp/src/boostcamp_mcp/server.py"
          ]
