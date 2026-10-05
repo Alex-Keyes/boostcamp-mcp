@@ -30,7 +30,7 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [tool.uv.sources]
-boostcampapi = { git = "https://github.com/Alex-Keyes/boostcamp-api.git" }
+boostcampapi = { git = "https://github.com/Alex-Keyes/boostcamp-api.git", rev = "17aa647c0c7954054b6b98253d3f8ff0dbc18f0f" }
 
 [build-system]
 requires = ["hatchling"]

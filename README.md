@@ -66,7 +66,12 @@ uv run login
 This command supports Boostcamp accounts with an email and password. Follow the prompts:
 - Enter your Boostcamp email and password.
 - The script will securely authenticate and save your session locally.
-- The ID token is stored in the local `.env` file (automatically ignored by git).
+- The ID token and Firebase refresh token are stored in the local `.env` file
+  (automatically ignored by git). Email and password are not saved.
+- The existing token provider renews ID tokens automatically before expiry and retries
+  once after an authentication rejection. Restart your MCP client after login.
+- If you previously logged in with an ID token only, run `uv sync --upgrade-package
+  boostcampapi` and `uv run login` once to enable automatic renewal.
 
 #### Google, passkey, and other OAuth accounts
 
@@ -157,12 +162,15 @@ exercises carry a `superset` id so the grouping is still visible.
 ### Authentication Issues
 If you see "Authentication Error" or token expiration messages:
 1. For Google, passkey, or OAuth authentication, check or replace `BOOSTCAMP_REFRESH_TOKEN`.
-2. For email/password authentication, run `uv run login` again.
+2. For email/password authentication, run `uv run login` again if the refresh token
+   is missing or invalid. Routine ID-token expiry does not require another login.
 3. Restart your MCP client (Claude Desktop or Claude Code).
 
 ### Credential Management
 - `BOOSTCAMP_AUTH_TOKEN` remains supported, but Firebase ID tokens expire after about one hour.
-- `BOOSTCAMP_REFRESH_TOKEN` enables unattended automatic ID-token refresh.
+- `uv run login` saves `BOOSTCAMP_REFRESH_TOKEN` for unattended automatic ID-token refresh.
+- Login disables library session-file saving; no plaintext email/password or session pickle
+  is written. Token rotations remain in memory in the MCP provider.
 - Credentials are read from your local `.env` and are never written to logs.
 - **Security Note**: Never commit your `.env`. It is included in `.gitignore` by default.
 

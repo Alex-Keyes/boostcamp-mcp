@@ -183,7 +183,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "boostcampapi", git = "https://github.com/Alex-Keyes/boostcamp-api.git" },
+    { name = "boostcampapi", git = "https://github.com/Alex-Keyes/boostcamp-api.git?rev=17aa647c0c7954054b6b98253d3f8ff0dbc18f0f" },
     { name = "fastmcp", specifier = ">=3.2.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
@@ -199,7 +199,7 @@ dev = [
 [[package]]
 name = "boostcampapi"
 version = "0.1.0"
-source = { git = "https://github.com/Alex-Keyes/boostcamp-api.git#4ccb781ed014a84618c0c551dc2355ee9b3636ff" }
+source = { git = "https://github.com/Alex-Keyes/boostcamp-api.git?rev=17aa647c0c7954054b6b98253d3f8ff0dbc18f0f#17aa647c0c7954054b6b98253d3f8ff0dbc18f0f" }
 dependencies = [
     { name = "aiohttp" },
 ]
