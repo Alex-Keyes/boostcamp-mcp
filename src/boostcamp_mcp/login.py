@@ -9,7 +9,7 @@ env_path = Path(".env")
 load_dotenv(dotenv_path=env_path)
 
 async def login():
-    print(f"--- Boostcamp API Login (Library Wrapper) ---")
+    print("--- Boostcamp API Login (Library Wrapper) ---")
     
     email = input("Email: ")
     password = getpass.getpass("Password: ")
@@ -32,6 +32,9 @@ async def login():
             
             set_key(str(env_path), "BOOSTCAMP_AUTH_TOKEN", api.token)
             set_key(str(env_path), "BOOSTCAMP_REFRESH_TOKEN", refresh_token)
+            # The refresh token is password-equivalent: keep .env owner-only even
+            # if it already existed with broader permissions.
+            env_path.chmod(0o600)
             print("\n✅ Login successful!")
             print(f"Tokens saved to {env_path.absolute()}; ID tokens will refresh automatically.")
         else:

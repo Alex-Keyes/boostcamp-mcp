@@ -125,8 +125,13 @@ Once authenticated, use these tools directly in Claude:
 | `get_program_details` | Get full plan for a program ID | `program_id` |
 | `list_blogs` | List recent blog posts | `page`, `page_size` |
 | `get_home_summary` | Dashboard stats (streak/totals) | `timezone_offset` |
+| `get_home_programs` | Active/recent program summary | `timezone_offset` |
 | `get_home_chart` | Training volume chart data | `timezone_offset` |
 | `get_home_muscle` | Muscle group distribution | `timezone_offset` |
+
+All tools return JSON. `timezone_offset` is in minutes east of UTC (for example
+`-300` for US Eastern, `60` for Central European) and defaults to your computer's
+local timezone, so workouts are bucketed into the right days without setting it.
 
 ### Working with training history
 
@@ -173,6 +178,15 @@ If you see "Authentication Error" or token expiration messages:
   is written. Token rotations remain in memory in the MCP provider.
 - Credentials are read from your local `.env` and are never written to logs.
 - **Security Note**: Never commit your `.env`. It is included in `.gitignore` by default.
+
+## 🧪 Development
+
+```bash
+uv sync
+uv run pytest
+```
+
+Tests also run on every pull request via GitHub Actions.
 
 ## 📄 License
 

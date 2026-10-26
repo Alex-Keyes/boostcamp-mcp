@@ -2,6 +2,8 @@
 import base64
 import json
 import importlib
+import os
+import stat
 from contextlib import asynccontextmanager
 from pathlib import Path
 from unittest.mock import patch
@@ -57,6 +59,8 @@ async def test_login_to_expiry_to_automatic_refresh(tmp_path, monkeypatch, capsy
     assert values == {"BOOSTCAMP_AUTH_TOKEN": jwt(2_000),
                       "BOOSTCAMP_REFRESH_TOKEN": "login-refresh-secret"}
     assert not Path(".boostcamp").exists()
+    if os.name == "posix":
+        assert stat.S_IMODE(Path(".env").stat().st_mode) == 0o600
     output = capsys.readouterr().out
     assert "test-password-secret" not in output
     assert "login-refresh-secret" not in output

@@ -1,7 +1,7 @@
 [project]
 name = "boostcamp-mcp"
 version = "0.1.0"
-description = "Add your description here"
+description = "MCP server for the Boostcamp fitness app: training history, programs and analytics for Claude"
 readme = "README.md"
 authors = [
     { name = "Alex Keyes", email = "alex.o.keyes@gmail.com" }
