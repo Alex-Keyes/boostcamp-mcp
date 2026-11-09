@@ -318,3 +318,52 @@ def test_summarize_unitless_workout_stays_null():
     out = _summarize_workout(w)
     assert out["total_volume"] == 0.0
     assert out["volume_unit"] is None
+
+
+from pytest import approx
+
+
+def _performed_set(**overrides):
+    """A set as the endpoint returns it: planned pair plus archived pair."""
+    s = {"value": "47.5", "amount": "3", "valueEmpty": False,
+         "amountEmpty": False, "skipped": False, "weight_unit": "kg",
+         "archived_weight": 104.72, "archived_reps": 3}
+    s.update(overrides)
+    return s
+
+
+def test_slim_set_converts_archived_pounds_to_kilograms():
+    # 104.72 lb is 47.5 kg; archived weights arrive in pounds for a kg account,
+    # and the template still says 40 so a fallback cannot fake this
+    s = _performed_set(value="40", archived_weight=104.72)
+    assert _slim_set(s)["weight"] == approx(47.5, abs=0.01)
+
+
+def test_slim_set_prefers_performed_weight_over_the_plan():
+    # the bar went to 50 kg partway through, the template still says 47.5
+    s = _performed_set(archived_weight=110.23)
+    assert _slim_set(s)["weight"] == approx(50.0, abs=0.01)
+
+
+def test_slim_set_reads_amrap_reps_from_the_archive():
+    # amount "3+" is the target and parses to zero; six reps were actually done
+    s = _performed_set(amount="3+", archived_weight=110.23, archived_reps=6)
+    assert _slim_set(s)["reps"] == 6.0
+
+
+def test_slim_set_leaves_pound_accounts_unconverted():
+    s = _performed_set(value="100", amount="10", weight_unit="lbs",
+                       archived_weight=120, archived_reps=10)
+    assert _slim_set(s)["weight"] == 120.0
+    assert _slim_set(s)["reps"] == 10.0
+
+
+def test_set_volume_uses_the_performed_set():
+    s = _performed_set(amount="3+", archived_weight=110.23, archived_reps=6)
+    assert _set_volume(s) == approx(300.0, abs=0.1)
+
+
+def test_set_volume_falls_back_to_the_plan_when_nothing_was_archived():
+    s = {"value": "100", "amount": "5", "valueEmpty": False,
+         "amountEmpty": False, "skipped": False, "weight_unit": "kg"}
+    assert _set_volume(s) == 500.0

@@ -24,12 +24,57 @@ def _to_number(raw: Any, empty: bool) -> float:
         return 0.0
 
 
+LB_PER_KG = 2.2046226218
+
+
+def _performed_weight(s: dict) -> float:
+    """Weight actually lifted, expressed in the set's own unit.
+
+    The endpoint keeps two weights per set: `value`, which is the template's
+    planned weight, and `archived_weight`, which is what was actually put on
+    the bar. They diverge as soon as someone changes the load, and `value` is
+    left blank on any set the user replaced, so it cannot be used for volume
+    or for reading a session back.
+
+    `archived_weight` is always in pounds regardless of the account's unit,
+    so convert to kilograms when the set says kg. Falls back to the planned
+    weight for sets that were never archived.
+    """
+    archived = s.get("archived_weight")
+    if archived not in (None, "", 0, 0.0):
+        try:
+            pounds = float(archived)
+        except (TypeError, ValueError):
+            pounds = 0.0
+        if pounds > 0:
+            unit = (s.get("weight_unit") or "").lower()
+            return pounds / LB_PER_KG if unit.startswith("kg") else pounds
+    return _to_number(s.get("value"), s.get("valueEmpty", False))
+
+
+def _performed_reps(s: dict) -> float:
+    """Reps actually performed.
+
+    `amount` is the planned target and can be a string like "3+" on an AMRAP
+    set, which parses to zero. `archived_reps` holds what was done.
+    """
+    archived = s.get("archived_reps")
+    if archived not in (None, "", 0, 0.0):
+        try:
+            reps = float(archived)
+        except (TypeError, ValueError):
+            reps = 0.0
+        if reps > 0:
+            return reps
+    return _to_number(s.get("amount"), s.get("amountEmpty", False))
+
+
 def _slim_set(s: dict) -> dict:
     """Keep only the analytically meaningful fields of a raw set."""
     intensity = s.get("intensity") or None
     return {
-        "weight": _to_number(s.get("value"), s.get("valueEmpty", False)),
-        "reps": _to_number(s.get("amount"), s.get("amountEmpty", False)),
+        "weight": _performed_weight(s),
+        "reps": _performed_reps(s),
         "target": s.get("target"),
         "target_type": s.get("target_type"),
         "rpe": intensity,
@@ -42,9 +87,7 @@ def _set_volume(s: dict) -> float:
     """weight * reps for a non-skipped set, else 0.0."""
     if s.get("skipped", False):
         return 0.0
-    weight = _to_number(s.get("value"), s.get("valueEmpty", False))
-    reps = _to_number(s.get("amount"), s.get("amountEmpty", False))
-    return weight * reps
+    return _performed_weight(s) * _performed_reps(s)
 
 
 def _normalize_records(records: list) -> list:
